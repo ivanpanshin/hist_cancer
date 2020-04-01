@@ -5,6 +5,7 @@ numpy
 pandas
 torch
 torchvision
+efficientnet-pytorch
 tqdm
 scikit-learn
 matplotlib

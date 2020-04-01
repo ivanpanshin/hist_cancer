@@ -6,8 +6,8 @@ import torch
 import time
 from torch.utils.tensorboard import SummaryWriter
 import shutil
+from tools import utils
 
-import utils
 
 def parse_config():
     parser = argparse.ArgumentParser()
@@ -35,6 +35,9 @@ if __name__ == "__main__":
 
     batch_sizes = {'train_batch_size': hyperparams['dataloaders']['train_batch_size'],
                    'valid_batch_size': hyperparams['dataloaders']['valid_batch_size']}
+
+    utils.seed_everything()
+
     transforms = utils.build_augmentations('train')
 
     loaders = utils.build_dataloaders(data_dir, transforms, 'train', batch_sizes, fold_index=fold_index)
@@ -76,3 +79,4 @@ if __name__ == "__main__":
             valid_loss_min = validation_metrics['loss']
 
     writer.close()
+

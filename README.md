@@ -6,7 +6,7 @@ To reproduce my solution without retraining, do the following steps:
 1. [Installation](#installation)
 2. [Download Dataset](#download-dataset)
 3. [Download Pretrained models](#pretrained-models)
-4. [Inference] (#inference)
+4. [Inference](#inference)
 
 ## Installation
 All requirements should be detailed in requirements.txt. Using virtual environment is strongly recommended.

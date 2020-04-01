@@ -6,7 +6,7 @@ To reproduce my solution without retraining, do the following steps:
 1. [Installation](#installation)
 2. [Download Dataset](#download-dataset)
 3. [Download Pretrained models](#pretrained-models)
-4. run `bash reproduce.sh`
+4. [Inference] (#inference)
 
 ## Installation
 All requirements should be detailed in requirements.txt. Using virtual environment is strongly recommended.
@@ -39,7 +39,7 @@ $ python train.py --config_name {config_path}
 ```
 
 ## Pretrained models
-You can download pretrained model that used for my final model from [link](https://www.kaggle.com/pudae81/understandingclouds1stplaceweights)
+You can download pretrained model that were used for my final model from [link](https://www.kaggle.com/pudae81/understandingclouds1stplaceweights)
 ```
 $ mkdir -p weights
 $ bash download_pretrained.sh
@@ -47,13 +47,13 @@ $ bash download_pretrained.sh
 
 
 ## Inference
-If trained weights are prepared, you can create files that contains predictions for test set using testing config files from configs directory.
+If trained weights are prepared, you can create files that contain predictions for test set using testing config files from configs directory.
 
 In order to inference a single model run:
 ```
 $ python inference.py --config_name configs/test_single_model.yml
 ```
-In order to blend (simple mean) several models run:
+In order to inference a blend (simple mean) of several models run:
 ```
 $ python inference.py --config_name configs/test_blend.yml
 ```

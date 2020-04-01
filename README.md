@@ -17,7 +17,6 @@ pip install -r requirements.txt
 ```
 
 ## Prepare dataset
-### Download dataset
 Download and extract *train_images.zip* and *test_images.zip* to *data* directory.
 ```
 $ kaggle competitions download -c histopathologic-cancer-detection
@@ -34,11 +33,19 @@ $ python create_splits.py
 ## Training
 In the configs directory, you can find configurations I used to train my final models.
 
-### Train models
 To train models, run following commands.
 ```
 $ python train.py --config_name {config_path} 
 ```
+
+### Pretrained models
+You can download pretrained model that used for my final model from [link](https://www.kaggle.com/pudae81/understandingclouds1stplaceweights)
+```
+$ mkdir -p weights
+$ bash download_pretrained.sh
+```
+
+
 ## Inference
 If trained weights are prepared, you can create files that contains predictions for test set using testing config files from configs directory.
 
@@ -52,3 +59,5 @@ $ python inference.py --config_name configs/test_blend.yml
 ```
 
 After that you can find .csv files in subs directory. Keep in mind that test predictions are generated with test time augmentation (TTA-4) by default, which makes inference several times slower. 
+
+

@@ -5,6 +5,7 @@ import pandas as pd
 import argparse
 import time
 from tools import utils
+import logging
 
 
 def sigmoid(x):
@@ -24,7 +25,7 @@ def parse_config():
 
 
 if __name__ == "__main__":
-    start_time = time.time()
+    start_time = time.ctime()
     hyperparams = parse_config()
     single_model = hyperparams['blend']['single_model']
     data_dir = hyperparams['dataset']['data_dir']
@@ -32,6 +33,8 @@ if __name__ == "__main__":
 
     transforms = utils.build_augmentations('test')
     loaders = utils.build_dataloaders(data_dir, transforms, 'test', batch_sizes)
+
+    logging = logging.basicConfig(filename="logs/hist_model_{}_fold_{}/test_log.txt", level=logging.INFO, filemode='w')
 
     list_of_model_weights = os.listdir('weights')
     sample_submission = pd.read_csv(os.path.join(data_dir, 'sample_submission.csv'))
@@ -45,7 +48,7 @@ if __name__ == "__main__":
 
     else:
         for index_of_model, num_of_models in enumerate(list_of_model_weights):
-            print('Inferencing model number {}'.format(index_of_model))
+            utils.add_to_logs(logging, 'Inferencing model number {}'.format(index_of_model))
             path = os.path.join('weights', list_of_model_weights[index_of_model])
             backbone = path.split('_')[1]
             model = utils.Model(backbone).cuda()
@@ -64,4 +67,4 @@ if __name__ == "__main__":
     else:
         sample_submission.to_csv('subs/sub_blend.csv', index=False)
 
-    print(time.time() - start_time)
+    utils.add_to_logs(logging, 'complete time of inference: {}'.format(time.ctime() - start_time))

@@ -31,3 +31,24 @@ $ chmod 644 data/*
 ```
 $ python create_splits.py
 ```
+## Training
+In the configs directory, you can find configurations I used to train my final models.
+
+### Train models
+To train models, run following commands.
+```
+$ python train.py --config_name {config_path} 
+```
+## Inference
+If trained weights are prepared, you can create files that contains predictions for test set using testing config files from configs directory.
+
+In order to inference a single model run:
+```
+$ python inference.py --config_name configs/test_single_model.yml
+```
+In order to blend (simple mean) several models run:
+```
+$ python inference.py --config_name configs/test_blend.yml
+```
+
+After that you can find .csv files in subs directory. Keep in mind that test predictions are generated with test time augmentation (TTA-4) by default, which makes inference several times slower. 

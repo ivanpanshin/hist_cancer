@@ -52,8 +52,8 @@ if __name__ == "__main__":
     shutil.rmtree('logs/hist_model_{}_fold_{}'.format(backbone, fold_index), ignore_errors=True)
     os.makedirs("logs/hist_model_{}_fold_{}/train_log.txt".format(backbone, fold_index))
     writer = SummaryWriter('runs/hist_model_{}_fold_{}'.format(backbone, fold_index))
-    logging = logging.basicConfig(filename="logs/hist_model_{}_fold_{}/train_log.txt".format(backbone, fold_index), level=logging.INFO, filemode='w')
-
+    logging_path = "logs/hist_model_{}_fold_{}/train.log".format(backbone, fold_index)
+    logging = logging.basicConfig(filename=logging_path, level=logging.INFO, filemode='w')
     valid_loss_min = np.Inf
     for epoch in (range(n_epochs)):
         utils.add_to_logs(logging, '{}, epoch {}'.format(time.ctime(), epoch))

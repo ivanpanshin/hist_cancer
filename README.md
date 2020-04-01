@@ -16,7 +16,7 @@ source venv_hist/source/bin/activate
 pip install -r requirements.txt
 ```
 
-## Prepare dataset
+## Download dataset
 Download and extract *train_images.zip* and *test_images.zip* to *data* directory.
 ```
 $ kaggle competitions download -c histopathologic-cancer-detection
@@ -38,7 +38,7 @@ To train models, run following commands.
 $ python train.py --config_name {config_path} 
 ```
 
-### Pretrained models
+## Pretrained models
 You can download pretrained model that used for my final model from [link](https://www.kaggle.com/pudae81/understandingclouds1stplaceweights)
 ```
 $ mkdir -p weights

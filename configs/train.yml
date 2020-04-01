@@ -1,0 +1,31 @@
+train:
+  n_epochs: 20
+  fold_index: 0
+  backbone: 'efficientnet-b0'
+
+dataset:
+  n_splits: 5
+  data_dir: 'data'
+
+dataloaders:
+  train_batch_size: 64
+  valid_batch_size: 128
+  test_batch_size: 128
+
+optimizer:
+  name: 'Adam'
+  params_first_stage:
+    lr: 0.01
+  params_second_stage:
+    lr: 0.01
+
+
+scheduler:
+  name: StepLR
+  params:
+    step_size: 300
+    gamma: 0.1
+
+loss:
+  name: 'BCEWithLogitsLoss'
+

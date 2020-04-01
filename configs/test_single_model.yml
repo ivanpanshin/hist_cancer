@@ -1,0 +1,7 @@
+blend:
+  single_model: true
+  backbone: 'efficientnet-b1'
+dataset:
+  data_dir: 'data'
+dataloaders:
+  test_batch_size: 128

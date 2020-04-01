@@ -1,0 +1,16 @@
+kaggle
+jupyter
+ipykernel
+numpy
+pandas
+torch
+torchvision
+tqdm
+scikit-learn
+matplotlib
+opencv-python
+Pillow
+albumentations
+tensorboard
+torch-lr-finder
+ttach

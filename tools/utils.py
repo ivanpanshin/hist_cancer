@@ -11,12 +11,29 @@ from torch.optim import lr_scheduler
 import cv2
 import albumentations
 from albumentations import pytorch as AT
-
+import random
 import ttach as tta
 
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
+
+
+def seed_everything(seed=42):
+    random.seed(seed)
+    os.environ['PYHTONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+
+
+def add_to_logs(logging, message):
+    logging.info(message)
+
+
+def add_to_tensorboard_logs(writer, message, tag, index):
+    writer.add_scalar(tag, message, index)
 
 
 class cancer_dataset(Dataset):
@@ -128,6 +145,7 @@ def test_preds(model, data_dir, test_loader):
 
     return test_preds
 
+
 class Model(nn.Module):
     def __init__(self, backbone):
         super(Model, self).__init__()
@@ -195,6 +213,7 @@ def build_augmentations(mode):
 
     return transforms
 
+
 def build_optim(model, optimizer_params, scheduler_params, loss_params):
     if loss_params['name'] == 'BCEWithLogitsLoss':
         criterion = nn.BCEWithLogitsLoss()
@@ -202,6 +221,7 @@ def build_optim(model, optimizer_params, scheduler_params, loss_params):
     scheduler = lr_scheduler.StepLR(optimizer, **scheduler_params['params'])
 
     return {'criterion': criterion, 'optimizer': optimizer, 'scheduler': scheduler}
+
 
 def build_dataloaders(data_dir, transforms, mode, batch_sizes, fold_index=None):
     if mode == 'train':
@@ -225,7 +245,5 @@ def build_dataloaders(data_dir, transforms, mode, batch_sizes, fold_index=None):
         loaders = {'test_loader': test_loader}
 
     return loaders
-
-
 
 

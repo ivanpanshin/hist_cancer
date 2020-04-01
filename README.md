@@ -12,7 +12,7 @@ To reproduce my solution without retraining, do the following steps:
 All requirements should be detailed in requirements.txt. Using virtual environment is strongly recommended.
 ```
 python3 -m venv venv_hist
-source venv_hist/source/bin/activate
+source venv_hist/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -21,9 +21,9 @@ Download and extract *train_images.zip* and *test_images.zip* to *data* director
 ```
 $ kaggle competitions download -c histopathologic-cancer-detection
 $ wget https://storage.googleapis.com/kaggle-forum-message-attachments/496876/11666/patch_id_wsi_full.zip 
-$ unip patch_id_wsi_full.zip -d data
-$ unzip histopathologic.zip -d data
-$ chmod 644 data/*
+$ unzip patch_id_wsi_full.zip -d data
+$ unzip histopathologic-cancer-detection.zip -d data
+$ rm *.zip
 ```
 
 ### Generate CSV files
@@ -39,7 +39,7 @@ $ python train.py --config_name {config_path}
 ```
 
 ## Pretrained models
-You can download pretrained model that were used for my final model from [link](https://www.kaggle.com/pudae81/understandingclouds1stplaceweights)
+You can download pretrained model that were used for my final model from [link](https://www.kaggle.com/ivanpan/histopathologic-cancer-detection-weights)
 ```
 $ mkdir -p weights
 $ bash download_pretrained.sh

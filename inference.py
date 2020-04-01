@@ -1,15 +1,15 @@
 import yaml
 import os
-import torch
 import numpy as np
 import pandas as pd
 import argparse
 import time
+from tools import utils
 
-import utils
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
+
 
 def parse_config():
     parser = argparse.ArgumentParser()
@@ -21,6 +21,7 @@ def parse_config():
         hyperparams = yaml.full_load(config_file)
 
     return hyperparams
+
 
 if __name__ == "__main__":
     start_time = time.time()

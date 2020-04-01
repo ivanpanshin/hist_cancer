@@ -7,6 +7,7 @@ import time
 from torch.utils.tensorboard import SummaryWriter
 import shutil
 from tools import utils
+import logging
 
 
 def parse_config():
@@ -48,21 +49,24 @@ if __name__ == "__main__":
     criterion, optimizer, scheduler = optim['criterion'], optim['optimizer'], optim['scheduler']
 
     shutil.rmtree('runs/hist_model_{}_fold_{}'.format(backbone, fold_index), ignore_errors=True)
+    shutil.rmtree('logs/hist_model_{}_fold_{}'.format(backbone, fold_index), ignore_errors=True)
     writer = SummaryWriter('runs/hist_model_{}_fold_{}'.format(backbone, fold_index))
+    logging = logging.basicConfig(filename="logs/hist_model_{}_fold_{}/train_log.txt", level=logging.INFO, filemode='w')
 
     valid_loss_min = np.Inf
     for epoch in (range(n_epochs)):
-        print(time.ctime(), 'Epoch:', epoch)
+        utils.add_to_logs(logging, '{}, epoch {}'.format(time.ctime(), epoch))
 
         train_metrics = utils.train_epoch(epoch, model, optimizer, criterion, loaders['train_loader'])
         validation_metrics = utils.validation(epoch, model, criterion, loaders['valid_loader'])
 
-        writer.add_scalar('Loss/train', train_metrics['loss'], epoch)
-        writer.add_scalar('Loss/validation', validation_metrics['loss'], epoch)
-        writer.add_scalar('Accuracy/validation', validation_metrics['accuracy'], epoch)
-        writer.add_scalar('AUC/validation', validation_metrics['val_auc'], epoch)
+        utils.add_to_tensorboard_logs(writer, train_metrics['loss'], 'Loss/train', epoch)
+        utils.add_to_tensorboard_logs(writer, validation_metrics['loss'], 'Loss/validation', epoch)
+        utils.add_to_tensorboard_logs(writer, validation_metrics['accuracy'], 'Accuracy/validation', epoch)
+        utils.add_to_tensorboard_logs(writer, validation_metrics['val_auc'], 'AUC/validation', epoch)
 
-        print('Epoch {}, train loss: {:.4f}, valid loss: {:.4f}'.format(epoch, train_metrics['loss'], validation_metrics['loss']))
+        utils.add_to_logs(logging, 'Epoch {}, train loss: {:.4f}, valid loss: {:.4f}, valid accuracy: {:.4f}, valid AUC: {:.4f}'.format(epoch, train_metrics['loss'], validation_metrics['loss'], validation_metrics['accuracy'], validation_metrics['val_auc']))
+
         if epoch >= 2:
             scheduler.step(validation_metrics['loss'])
 
@@ -71,12 +75,12 @@ if __name__ == "__main__":
             optimizer = utils.build_optim(model, optimizer_params_second_stage, scheduler_params, loss_params)['optimizer']
 
         if validation_metrics['loss'] <= valid_loss_min:
-            print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
+            utils.add_to_logs(logging, 'Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
                 valid_loss_min,
                 validation_metrics['loss']))
+
             os.makedirs('weights', exist_ok=True)
             torch.save(model.state_dict(), 'weights/model_{}_fold{}.pth'.format(backbone, fold_index))
             valid_loss_min = validation_metrics['loss']
 
     writer.close()
-

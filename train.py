@@ -43,7 +43,6 @@ if __name__ == "__main__":
 
     loaders = utils.build_dataloaders(data_dir, transforms, 'train', batch_sizes, fold_index=fold_index)
     model = utils.build_model(backbone).cuda()
-    model.unfreeze_model()
 
     optim = utils.build_optim(model, optimizer_params_first_stage, scheduler_params, loss_params)
     criterion, optimizer, scheduler = optim['criterion'], optim['optimizer'], optim['scheduler']

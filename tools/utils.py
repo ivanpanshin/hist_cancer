@@ -218,7 +218,7 @@ def build_optim(model, optimizer_params, scheduler_params, loss_params):
     if loss_params['name'] == 'BCEWithLogitsLoss':
         criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), **optimizer_params)
-    scheduler = lr_scheduler.StepLR(optimizer, **scheduler_params['params'])
+    scheduler = lr_scheduler.ReduceLROnPlateau(optimizer, **scheduler_params['params'])
 
     return {'criterion': criterion, 'optimizer': optimizer, 'scheduler': scheduler}
 

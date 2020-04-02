@@ -21,10 +21,10 @@ optimizer:
 
 
 scheduler:
-  name: StepLR
+  name: ReduceLROnPlateau
   params:
-    step_size: 300
-    gamma: 0.1
+    factor: 0.3
+    patience: 3
 
 loss:
   name: 'BCEWithLogitsLoss'

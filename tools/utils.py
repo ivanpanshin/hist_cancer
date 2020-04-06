@@ -13,6 +13,9 @@ import albumentations
 from albumentations import pytorch as AT
 import random
 import ttach as tta
+import torchvision.transforms as torch_transforms
+import PIL.Image as Image
+from . import seresnet
 
 
 def sigmoid(x):
@@ -127,6 +130,7 @@ def validation(epoch, model, criterion, valid_loader):
 
 def test_preds(model, data_dir, test_loader):
     model.eval()
+
     model = tta.ClassificationTTAWrapper(model, tta.aliases.d4_transform())
 
     sample_submission = pd.read_csv(os.path.join(data_dir, 'sample_submission.csv'))
@@ -142,6 +146,8 @@ def test_preds(model, data_dir, test_loader):
 
             del data, output
             torch.cuda.empty_cache()
+        if batch_i % 100 == 0:
+            print(batch_i * test_loader.batch_size)
 
     return test_preds
 
@@ -150,7 +156,8 @@ class Model(nn.Module):
     def __init__(self, backbone):
         super(Model, self).__init__()
         self.net = EfficientNet.from_pretrained(backbone)
-        num_features = self.net._bn1.num_features
+
+        num_features = self.net._bn1.num_features * 2
         for param in self.net.parameters():
             param.requires_grad = False
         self.net._fc = nn.Sequential(
@@ -166,6 +173,9 @@ class Model(nn.Module):
             nn.Dropout(p=0.8),
             nn.Linear(num_features // 4, 2))
 
+        self._avg_pooling = nn.AdaptiveAvgPool2d(1)
+        self._max_pooling = nn.AdaptiveMaxPool2d(1)
+
     def unfreeze_model(self):
         for param in self.net.parameters():
             param.requires_grad = True
@@ -174,7 +184,16 @@ class Model(nn.Module):
         self.load_state_dict(torch.load(path))
 
     def forward(self, x):
-        return self.net(x)
+        x = self.net.extract_features(x)
+
+        x1 = self._avg_pooling(x)
+        x2 = self._max_pooling(x)
+        x = torch.cat([x1, x2], 1)
+        x = x.view(x.size(0), -1)
+        x = self.net._dropout(x)
+        x = self.net._fc(x)
+
+        return x
 
 
 def build_model(backbone):
@@ -239,6 +258,8 @@ def build_dataloaders(data_dir, transforms, mode, batch_sizes, fold_index=None):
 
         loaders = {'train_loader': train_loader, 'valid_loader': valid_loader}
     else:
+
+
         test_set = cancer_dataset(data_dir, 'test', transforms['test_transforms'])
         test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_sizes['test_batch_size'])
 

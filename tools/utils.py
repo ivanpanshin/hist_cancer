@@ -13,10 +13,6 @@ import albumentations
 from albumentations import pytorch as AT
 import random
 import ttach as tta
-import torchvision.transforms as torch_transforms
-import PIL.Image as Image
-from . import seresnet
-
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))

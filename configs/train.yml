@@ -8,9 +8,9 @@ dataset:
   data_dir: 'data'
 
 dataloaders:
-  train_batch_size: 64
-  valid_batch_size: 128
-  test_batch_size: 128
+  train_batch_size: 48
+  valid_batch_size: 15
+  test_batch_size: 15
 
 optimizer:
   name: 'Adam'

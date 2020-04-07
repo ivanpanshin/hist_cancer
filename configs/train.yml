@@ -1,7 +1,7 @@
 train:
   n_epochs: 20
   fold_index: 0
-  backbone: 'efficientnet-b0'
+  backbone: 'efficientnet-b3'
 
 dataset:
   n_splits: 5

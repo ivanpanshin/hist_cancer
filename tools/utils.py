@@ -7,12 +7,15 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torchvision.transforms as transforms
 from torch.optim import lr_scheduler
 import cv2
 import albumentations
 from albumentations import pytorch as AT
 import random
 import ttach as tta
+import PIL.Image as Image
+
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -53,10 +56,13 @@ class cancer_dataset(Dataset):
 
     def __getitem__(self, idx):
         image_name = os.path.join(self.data_dir, self.mode, self.ids[idx] + '.tif')
-        img = cv2.imread(image_name)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = self.transform(image=img)
-        image = image['image']
+        # img = cv2.imread(image_name)
+        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        # image = self.transform(image=img)
+        # image = image['image']
+
+        image = Image.open(image_name)
+        image = self.transform(image)
 
         if self.mode == 'train':
             return image, self.labels[idx]
@@ -94,32 +100,38 @@ def validation(epoch, model, criterion, valid_loader):
     model.eval()
     model = tta.ClassificationTTAWrapper(model, tta.aliases.d4_transform())
     val_loss = []
-    val_auc = []
 
     correct_samples = 0
 
+    full_a = np.zeros(len(valid_loader) * valid_loader.batch_size)
+    full_b = np.zeros(len(valid_loader) * valid_loader.batch_size)
+
+
     for batch_i, (data, target) in enumerate(valid_loader):
+        if batch_i % 100 == 0:
+            print(batch_i * valid_loader.batch_size)
         with torch.no_grad():
             data, target = data.cuda(), target.cuda()
             output = model(data)
-
             loss = criterion(output[:, 1], target.float())
 
             val_loss.append(loss.item())
-            a = target.data.cpu().numpy()
-            b = output[:, -1].detach().cpu().numpy()
+
+            full_a[batch_i * valid_loader.batch_size: batch_i * valid_loader.batch_size + output.shape[0]] = target.data.cpu().numpy()
+            full_b[batch_i * valid_loader.batch_size: batch_i * valid_loader.batch_size + output.shape[0]] = output[:, -1].detach().cpu().numpy()
 
             correct_samples += (target.detach().cpu().numpy() == np.argmax(output.detach().cpu().numpy(), axis=1)).sum()
-            val_auc.append(roc_auc_score(a, b))
+
 
             del data, target, output
             torch.cuda.empty_cache()
 
     valid_loss = np.mean(val_loss)
-    val_auc = np.mean(val_auc)
+    val_auc = roc_auc_score(full_a, full_b)
     accuracy_score = correct_samples / (len(valid_loader) * valid_loader.batch_size)
 
     metrics = {'loss': valid_loss, 'accuracy': accuracy_score, 'val_auc': val_auc}
+    print(metrics)
 
     return metrics
 
@@ -198,35 +210,63 @@ def build_model(backbone):
 
 def build_augmentations(mode):
     if mode == 'train':
-        train_transforms = albumentations.Compose([
-            albumentations.Resize(224, 224),
-            albumentations.HorizontalFlip(),
-            albumentations.RandomBrightness(),
-            albumentations.ShiftScaleRotate(rotate_limit=15, scale_limit=0.10),
-            albumentations.JpegCompression(80),
-            albumentations.HueSaturationValue(),
-            albumentations.Normalize(),
-            AT.ToTensor()
-        ])
+        train_transforms = transforms.Compose([
+            transforms.Resize((196, 196)),
+            transforms.RandomChoice([
+                transforms.ColorJitter(brightness=0.5),
+                transforms.ColorJitter(contrast=0.5),
+                transforms.ColorJitter(saturation=0.5),
+                transforms.ColorJitter(hue=0.5),
+                transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
+                transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3, hue=0.3),
+                transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+            ]),
+            transforms.RandomChoice([
+                transforms.RandomRotation((0, 0)),
+                transforms.RandomHorizontalFlip(p=1),
+                transforms.RandomVerticalFlip(p=1),
+                transforms.RandomRotation((90, 90)),
+                transforms.RandomRotation((180, 180)),
+                transforms.RandomRotation((270, 270)),
+                transforms.Compose([
+                    transforms.RandomHorizontalFlip(p=1),
+                    transforms.RandomRotation((90, 90)),
+                ]),
+                transforms.Compose([
+                    transforms.RandomHorizontalFlip(p=1),
+                    transforms.RandomRotation((270, 270)),
+                ])
+            ]),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225]
+            )])
 
-        valid_transforms = albumentations.Compose([
-            albumentations.Resize(224, 224),
-            albumentations.Normalize(),
-            AT.ToTensor()
-        ])
+        valid_transforms = transforms.Compose([
+            transforms.Resize((196, 196)),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225]
+            )])
 
-        transforms = {'train_transforms': train_transforms, 'valid_transforms': valid_transforms}
+
+        transforms_dict = {'train_transforms': train_transforms, 'valid_transforms': valid_transforms}
 
     else:
-        test_transforms = albumentations.Compose([
-            albumentations.Resize(224, 224),
-            albumentations.Normalize(),
-            AT.ToTensor()
-        ])
 
-        transforms = {'test_transforms': test_transforms}
+        test_transforms = transforms.Compose([
+            transforms.Resize((196, 196)),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225]
+            )])
 
-    return transforms
+        transforms_dict = {'test_transforms': test_transforms}
+
+    return transforms_dict
 
 
 def build_optim(model, optimizer_params, scheduler_params, loss_params):
@@ -262,5 +302,7 @@ def build_dataloaders(data_dir, transforms, mode, batch_sizes, fold_index=None):
         loaders = {'test_loader': test_loader}
 
     return loaders
+
+
 
 

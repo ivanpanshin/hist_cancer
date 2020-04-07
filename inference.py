@@ -5,6 +5,7 @@ import pandas as pd
 import argparse
 import time
 from tools import utils
+import logging
 
 
 def sigmoid(x):
@@ -38,13 +39,15 @@ if __name__ == "__main__":
     test_preds = np.zeros(sample_submission.shape[0])
     if single_model:
         backbone = hyperparams['blend']['backbone']
-        model = utils.Model(backbone).cuda()
-        path = os.path.join('weights', 'model_' + backbone +'_fold0.pth')
+        fold = hyperparams['blend']['fold']
+        model = utils.build_model(backbone).cuda()
+        path = os.path.join('weights', 'model_' + backbone + '_fold' + str(fold) + '.pth')
         model.load_model(path)
         test_preds += utils.test_preds(model, 'data', loaders['test_loader'])
 
     else:
         for index_of_model, num_of_models in enumerate(list_of_model_weights):
+            utils.add_to_logs(logging, 'Inferencing model number {}'.format(index_of_model))
             path = os.path.join('weights', list_of_model_weights[index_of_model])
             backbone = path.split('_')[1]
             model = utils.Model(backbone).cuda()
@@ -59,6 +62,7 @@ if __name__ == "__main__":
 
     os.makedirs('subs', exist_ok=True)
     if single_model:
-        sample_submission.to_csv('subs/sub_{}.csv'.format(backbone), index=False)
+        sample_submission.to_csv('subs/sub_{}_fold_{}.csv'.format(backbone, fold), index=False)
     else:
         sample_submission.to_csv('subs/sub_blend.csv', index=False)
+

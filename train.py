@@ -69,7 +69,7 @@ if __name__ == "__main__":
         utils.add_to_logs(logging, 'Epoch {}, train loss: {:.4f}, valid loss: {:.4f}, valid accuracy: {:.4f}, valid AUC: {:.4f}'.format(epoch, train_metrics['loss'], validation_metrics['loss'], validation_metrics['accuracy'], validation_metrics['val_auc']))
 
         if epoch >= 2:
-            scheduler.step(validation_metrics['loss'])
+            scheduler.step(validation_metrics['val_auc'])
 
         if epoch == 1:
             model.unfreeze_model()
@@ -83,5 +83,6 @@ if __name__ == "__main__":
             os.makedirs('weights', exist_ok=True)
             torch.save(model.state_dict(), 'weights/model_{}_fold{}.pth'.format(backbone, fold_index))
             valid_loss_min = validation_metrics['loss']
+       
 
     writer.close()

@@ -1,0 +1,8 @@
+blend:
+  single_model: true
+  backbone: 'seresnet50'
+  fold: 2
+dataset:
+  data_dir: 'data'
+dataloaders:
+  test_batch_size: 128

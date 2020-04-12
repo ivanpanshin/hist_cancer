@@ -1,5 +1,5 @@
 # Histopathologic Cancer Detection model
-Convolutional neural network model for Histopathologic Cancer Detection based on a modified version of PatchCamelyon dataset that achives 
+Convolutional neural network model for Histopathologic Cancer Detection based on a modified version of PatchCamelyon dataset that achives >0.98 AUROC on Kaggle private test set. 
 
 ## Reproducing solution
 To reproduce my solution without retraining, do the following steps:
@@ -55,7 +55,7 @@ $ python inference.py --config_name configs/{}
 ```
 In order to inference a blend (simple mean) of several models run:
 ```
-$ python inference.py --config_name configs/test_blend.yml
+$ python inference.py --config_name configs/test/test_blend.yml
 ```
 
 After that you can find .csv files in subs directory. Keep in mind that test predictions are generated with test time augmentation (TTA-4) by default, which makes inference several times slower. 

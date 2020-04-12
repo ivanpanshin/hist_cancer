@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+from collections import OrderedDict
 from sklearn.metrics import roc_auc_score
 from efficientnet_pytorch import EfficientNet
 from torch.utils.data import Dataset, DataLoader
@@ -8,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
+import torch.nn.functional as F
 from torch.optim import lr_scheduler
 import cv2
 import albumentations
@@ -15,6 +17,8 @@ from albumentations import pytorch as AT
 import random
 import ttach as tta
 import PIL.Image as Image
+
+from . import seresnet
 
 
 def sigmoid(x):
@@ -36,6 +40,18 @@ def add_to_logs(logging, message):
 
 def add_to_tensorboard_logs(writer, message, tag, index):
     writer.add_scalar(tag, message, index)
+
+
+def swa(paths):
+    state_dicts = []
+    for path in paths:
+        state_dicts.append(torch.load(path))
+
+    average_dict = OrderedDict()
+    for k in state_dicts[0].keys():
+        average_dict[k] = sum([state_dict[k] for state_dict in state_dicts]) / len(state_dicts)
+
+    return average_dict
 
 
 class cancer_dataset(Dataset):
@@ -106,7 +122,6 @@ def validation(epoch, model, criterion, valid_loader):
     full_a = np.zeros(len(valid_loader) * valid_loader.batch_size)
     full_b = np.zeros(len(valid_loader) * valid_loader.batch_size)
 
-
     for batch_i, (data, target) in enumerate(valid_loader):
         if batch_i % 100 == 0:
             print(batch_i * valid_loader.batch_size)
@@ -121,7 +136,6 @@ def validation(epoch, model, criterion, valid_loader):
             full_b[batch_i * valid_loader.batch_size: batch_i * valid_loader.batch_size + output.shape[0]] = output[:, -1].detach().cpu().numpy()
 
             correct_samples += (target.detach().cpu().numpy() == np.argmax(output.detach().cpu().numpy(), axis=1)).sum()
-
 
             del data, target, output
             torch.cuda.empty_cache()
@@ -149,8 +163,7 @@ def test_preds(model, data_dir, test_loader):
             data = data.cuda()
             output = model(data)
 
-            test_preds[batch_i * test_loader.batch_size: batch_i * test_loader.batch_size + output.shape[0]] = sigmoid(
-                output[:, 1].detach().cpu().numpy())
+            test_preds[batch_i * test_loader.batch_size: batch_i * test_loader.batch_size + output.shape[0]] = sigmoid(output[:, 1].detach().cpu().numpy())
 
             del data, output
             torch.cuda.empty_cache()
@@ -181,8 +194,8 @@ class Model(nn.Module):
             nn.Dropout(p=0.8),
             nn.Linear(num_features // 4, 2))
 
-        self._avg_pooling = nn.AdaptiveAvgPool2d(1)
-        self._max_pooling = nn.AdaptiveMaxPool2d(1)
+        self.avg_pooling = nn.AdaptiveAvgPool2d(1)
+        self.max_pooling = nn.AdaptiveMaxPool2d(1)
 
     def unfreeze_model(self):
         for param in self.net.parameters():
@@ -194,8 +207,8 @@ class Model(nn.Module):
     def forward(self, x):
         x = self.net.extract_features(x)
 
-        x1 = self._avg_pooling(x)
-        x2 = self._max_pooling(x)
+        x1 = self.avg_pooling(x)
+        x2 = self.max_pooling(x)
         x = torch.cat([x1, x2], 1)
         x = x.view(x.size(0), -1)
         x = self.net._dropout(x)
@@ -205,7 +218,10 @@ class Model(nn.Module):
 
 
 def build_model(backbone):
-    return Model(backbone)
+    if backbone == 'seresnet50':
+        return seresnet.se_re()
+    elif backbone.split('-')[0] == 'efficientnet':
+        return Model(backbone)
 
 
 def build_augmentations(mode):
@@ -251,7 +267,6 @@ def build_augmentations(mode):
                 std=[0.229, 0.224, 0.225]
             )])
 
-
         transforms_dict = {'train_transforms': train_transforms, 'valid_transforms': valid_transforms}
 
     else:
@@ -294,15 +309,9 @@ def build_dataloaders(data_dir, transforms, mode, batch_sizes, fold_index=None):
 
         loaders = {'train_loader': train_loader, 'valid_loader': valid_loader}
     else:
-
-
         test_set = cancer_dataset(data_dir, 'test', transforms['test_transforms'])
         test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_sizes['test_batch_size'])
 
         loaders = {'test_loader': test_loader}
 
     return loaders
-
-
-
-

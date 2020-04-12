@@ -1,0 +1,31 @@
+train:
+  n_epochs: 20
+  fold_index: 0
+  backbone: 'seresnet50'
+
+dataset:
+  n_splits: 5
+  data_dir: 'data'
+
+dataloaders:
+  train_batch_size: 64
+  valid_batch_size: 15
+  test_batch_size: 15
+
+optimizer:
+  name: Adam
+  params_first_stage:
+    lr: 0.01
+  params_second_stage:
+    lr: 0.01
+
+
+scheduler:
+  name: ReduceLROnPlateau
+  params:
+    factor: 0.5
+    patience: 2
+
+loss:
+  name: 'BCEWithLogitsLoss'
+

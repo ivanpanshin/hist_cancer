@@ -1,4 +1,4 @@
-,CV (Fold),LB (Private Kaggle)
+Name of the model,CV (Fold),LB (Private Kaggle)
 se_resnet50 center crop (32px),0.91,0.89
 se_resnet50 original size (96 px),0.96,0.95
 se_resnet50 resize (196 px),0.980,0.966

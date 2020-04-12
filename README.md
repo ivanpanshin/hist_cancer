@@ -51,7 +51,7 @@ If trained weights are prepared, you can create files that contain predictions f
 
 In order to inference a single model run:
 ```
-$ python inference.py --config_name configs/test_single_model.yml
+$ python inference.py --config_name configs/{}
 ```
 In order to inference a blend (simple mean) of several models run:
 ```

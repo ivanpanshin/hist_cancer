@@ -4,4 +4,4 @@ se_resnet50 original size (96 px),0.96,0.95
 se_resnet50 resize (196 px),0.980,0.966
 se_resnet50 resize + TTA (196 px + 4TTA),0.985,0.969
 se_resnet50 resize + TTA + folds (196 px + 4TTA + 5 folds),—,0.977
-se_resnet50 resize + TTA + folds (196 px + 4TTA + 5 folds) + EfficientNet-b3 resize + TTA + folds (224 px + 4TTA + 5 folds),—,0.981
+se_resnet50 resize + TTA + folds (196 px + 4TTA + 5 folds) + EfficientNet-B3 resize + TTA + folds (224 px + 4TTA + 5 folds),—,0.981

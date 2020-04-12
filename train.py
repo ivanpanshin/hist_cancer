@@ -54,7 +54,7 @@ if __name__ == "__main__":
     logging_path = "logs/hist_model_{}_fold_{}/train.log".format(backbone, fold_index)
     logging.basicConfig(filename=logging_path, level=logging.INFO, filemode='w')
 
-    valid_loss_min = np.Inf
+    valid_auc_max = 0
     for epoch in (range(n_epochs)):
         utils.add_to_logs(logging, '{}, epoch {}'.format(time.ctime(), epoch))
 
@@ -75,14 +75,15 @@ if __name__ == "__main__":
             model.unfreeze_model()
             optimizer = utils.build_optim(model, optimizer_params_second_stage, scheduler_params, loss_params)['optimizer']
 
-        if validation_metrics['loss'] <= valid_loss_min:
-            utils.add_to_logs(logging, 'Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
-                valid_loss_min,
-                validation_metrics['loss']))
+        if validation_metrics['val_auc'] >= valid_auc_max:
+            utils.add_to_logs(logging, 'Validation auc increased ({:.6f} --> {:.6f}).  Saving model ...'.format(
+                valid_auc_max,
+                validation_metrics['val_auc']))
 
             os.makedirs('weights', exist_ok=True)
             torch.save(model.state_dict(), 'weights/model_{}_fold{}.pth'.format(backbone, fold_index))
-            valid_loss_min = validation_metrics['loss']
-       
+            valid_loss_min = validation_metrics['val_auc']
+        
+        scheduler.step(validation_metrics['val_auc'])
 
     writer.close()

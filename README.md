@@ -64,7 +64,7 @@ $ python inference.py --config_name configs/test/test_blend.yml
 After that you can find .csv files in subs directory. Keep in mind that test predictions are generated with test time augmentation (TTA-4) by default, which makes inference several times slower. 
 
 ## Details 
-- All logs (training and validation metrics) are stored in /.runs directory for tensorboard. 
+- Training logs (training and validation metrics) are stored in /.runs directory for tensorboard. 
 - Basic logs (training and validation metrics, hyperparameters, scheduling info, etc) are also stored in /logs directory.
 - TTA is done using great repo [ttach](https://github.com/qubvel/ttach).
 - Best weights (based on AUROC on validation) are stored in /weights directory. You can find SWA code in tools/utils.py. If you decide to use it, just uncomment saving model weights at the end of each epoch. 

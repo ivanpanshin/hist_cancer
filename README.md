@@ -31,7 +31,7 @@ $ rm *.zip
 
 ### Generate CSV files
 ```
-$ python create_splits.py
+$ python tools/create_splits.py
 ```
 ## Training
 In the configs directory, you can find configurations I used to train my final models.

@@ -14,7 +14,7 @@ def sigmoid(x):
 
 def parse_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_name", type=str, default='configs/test_single_model.yml')
+    parser.add_argument("--config_name", type=str, default='configs/test/test_efficientnet-b3-fold0.yml')
 
     parser_args = parser.parse_args()
 

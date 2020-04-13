@@ -12,7 +12,7 @@ import logging
 
 def parse_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_name", type=str, default='configs/train.yml')
+    parser.add_argument("--config_name", type=str, default='configs/train/train_efficientnet-b3-fold0.yml')
 
     parser_args = parser.parse_args()
 

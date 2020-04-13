@@ -50,7 +50,7 @@ if __name__ == "__main__":
             utils.add_to_logs(logging, 'Inferencing model number {}'.format(index_of_model))
             path = os.path.join('weights', list_of_model_weights[index_of_model])
             backbone = path.split('_')[1]
-            model = utils.build_model('str').cuda()
+            model = utils.build_model(backbone).cuda()
             model.load_model(path)
             test_preds += utils.test_preds(model, 'data', loaders['test_loader'])
 

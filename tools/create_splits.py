@@ -7,7 +7,7 @@ from sklearn.model_selection import GroupKFold
 def parse_config():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--config_name", type=str, default='configs/train.yml')
+    parser.add_argument("--config_name", type=str, default='configs/train/train_efficientnet-b3-fold0.yml')
     parser_args = parser.parse_args()
 
     with open(vars(parser_args)['config_name'], 'r') as config_file:

@@ -14,9 +14,9 @@ To reproduce my solution without retraining, do the following steps:
 ## Installation
 All requirements should be detailed in requirements.txt. Using virtual environment is strongly recommended.
 ```
-python3 -m venv venv_hist
-source venv_hist/bin/activate
-pip install -r requirements.txt
+$ python3 -m venv venv_hist
+$ source venv_hist/bin/activate
+$ pip install -r requirements.txt
 ```
 
 ## Download dataset

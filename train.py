@@ -85,5 +85,6 @@ if __name__ == "__main__":
             valid_loss_min = validation_metrics['val_auc']
         
         scheduler.step(validation_metrics['val_auc'])
+        #torch.save(model.state_dict(), 'weights/model_{}_fold{}_epoch{}.pth'.format(backbone, fold_index, epoch))
 
     writer.close()

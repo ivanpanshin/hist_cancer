@@ -82,7 +82,8 @@ if __name__ == "__main__":
 
             os.makedirs('weights', exist_ok=True)
             torch.save(model.state_dict(), 'weights/model_{}_fold{}.pth'.format(backbone, fold_index))
-            valid_loss_min = validation_metrics['val_auc']
+            valid_auc_max = validation_metrics['val_auc']
+            
         
         scheduler.step(validation_metrics['val_auc'])
         #torch.save(model.state_dict(), 'weights/model_{}_fold{}_epoch{}.pth'.format(backbone, fold_index, epoch))

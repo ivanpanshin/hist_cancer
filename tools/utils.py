@@ -187,7 +187,6 @@ class Model(nn.Module):
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.8),
             nn.Linear(num_features // 2, num_features // 4, bias=True),
-            nn.BatchNorm1d(num_features // 4),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.8),
             nn.Linear(num_features // 4, 2))

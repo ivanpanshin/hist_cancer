@@ -182,15 +182,13 @@ class Model(nn.Module):
         for param in self.net.parameters():
             param.requires_grad = False
         self.net._fc = nn.Sequential(
-            nn.BatchNorm1d(num_features),
-            nn.Dropout(p=0.8),
             nn.Linear(num_features, num_features // 2, bias=True),
-            nn.ReLU(inplace=True),
             nn.BatchNorm1d(num_features // 2),
+            nn.ReLU(inplace=True),
             nn.Dropout(p=0.8),
             nn.Linear(num_features // 2, num_features // 4, bias=True),
-            nn.ReLU(inplace=True),
             nn.BatchNorm1d(num_features // 4),
+            nn.ReLU(inplace=True),
             nn.Dropout(p=0.8),
             nn.Linear(num_features // 4, 2))
 
